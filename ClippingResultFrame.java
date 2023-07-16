@@ -1,7 +1,6 @@
 import java.awt.*;
 import java.awt.event.WindowAdapter;
 import java.awt.event.WindowEvent;
-import java.util.List;
 
 public class ClippingResultFrame extends Frame {
     private Point start, end;
