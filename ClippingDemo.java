@@ -50,8 +50,6 @@ public class ClippingDemo extends Frame {
                     } else {
                         JOptionPane.showMessageDialog(null, "Input tidak valid!");
                     }
-                } else if (e.getKeyCode() == KeyEvent.VK_SPACE) {
-                    repaint();
                 }
             }
 
