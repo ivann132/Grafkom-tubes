@@ -1,30 +1,64 @@
 import java.awt.*;
 import java.awt.event.MouseEvent;
-import java.awt.event.MouseListener;
+import java.awt.event.KeyAdapter;
+import java.awt.event.KeyEvent;
+import java.awt.event.MouseAdapter;
 import java.awt.event.WindowAdapter;
 import java.awt.event.WindowEvent;
 import java.util.ArrayList;
 import java.util.List;
 
-public class ClippingDemo extends Frame implements MouseListener {
+import javax.swing.JOptionPane;
 
-    private List<Point> vertices;
-    private Point clickedPoint;
+public class ClippingDemo extends Frame {
+    private static Point start, end;
+    private static Point clickedPoint;
 
     public ClippingDemo() {
-        vertices = new ArrayList<>();
+        start = null;
+        end = null;
         clickedPoint = null;
-
-        // Add vertices to the line
-        vertices.add(new Point(0, 0));
-        vertices.add(new Point(250, 250));
 
         // Set up the frame
         setTitle("Interactive Plot");
         setSize(400, 400);
         setVisible(true);
 
-        addMouseListener(this);
+        addMouseListener(new MouseAdapter() {
+            public void mouseClicked(MouseEvent e) {
+                clickedPoint = e.getPoint();
+                repaint();
+
+                ClippingResultFrame resultFrame = new ClippingResultFrame(start, end, clickedPoint);
+                resultFrame.addWindowListener(new WindowAdapter() {
+                    public void windowClosing(WindowEvent windowEvent) {
+                        clickedPoint = null;
+                        repaint();
+                    }
+                });
+            }
+        });
+
+        addKeyListener(new KeyAdapter() {
+            public void keyPressed(KeyEvent e) {
+                if (e.getKeyCode() == KeyEvent.VK_ENTER) {
+                    String input = JOptionPane
+                            .showInputDialog("Masukkan koordinat X1,Y1,X2,Y2 (pisahkan dengan koma):");
+                    String[] coordinates = input.split(",");
+                    if (coordinates.length == 4) {
+                        start = new Point(Integer.parseInt(coordinates[0]), Integer.parseInt(coordinates[1]));
+                        end = new Point(Integer.parseInt(coordinates[2]), Integer.parseInt(coordinates[3]));
+                        repaint();
+                    } else {
+                        JOptionPane.showMessageDialog(null, "Input tidak valid!");
+                    }
+                } else if (e.getKeyCode() == KeyEvent.VK_SPACE) {
+                    repaint();
+                }
+            }
+
+        });
+
     }
 
     @Override
@@ -34,11 +68,7 @@ public class ClippingDemo extends Frame implements MouseListener {
 
         // Draw the line
         g.setColor(Color.BLACK);
-        for (int i = 0; i < vertices.size() - 1; i++) {
-            Point p1 = vertices.get(i);
-            Point p2 = vertices.get(i + 1);
-            g.drawLine(p1.x, p1.y, p2.x, p2.y);
-        }
+        g.drawLine(start.x, start.y, end.x, end.y);
 
         // Draw the clipping rectangle if a point is clicked
         if (clickedPoint != null) {
@@ -61,37 +91,6 @@ public class ClippingDemo extends Frame implements MouseListener {
                 g.drawLine(0, gy, getWidth(), gy);
             }
         }
-    }
-
-    @Override
-    public void mouseClicked(MouseEvent e) {
-        clickedPoint = e.getPoint();
-        repaint();
-
-        ClippingResultFrame resultFrame = new ClippingResultFrame(vertices, clickedPoint);
-        resultFrame.addWindowListener(new WindowAdapter() {
-            public void windowClosing(WindowEvent windowEvent) {
-                clickedPoint = null;
-                repaint();
-            }
-        });
-    }
-
-    // Unused event handlers
-    @Override
-    public void mousePressed(MouseEvent e) {
-    }
-
-    @Override
-    public void mouseReleased(MouseEvent e) {
-    }
-
-    @Override
-    public void mouseEntered(MouseEvent e) {
-    }
-
-    @Override
-    public void mouseExited(MouseEvent e) {
     }
 
     public static void main(String[] args) {
