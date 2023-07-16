@@ -1,10 +1,11 @@
 import java.awt.*;
 import java.awt.event.*;
 
+import javax.swing.JOptionPane;
+
 public class Scalling extends Frame implements ActionListener {
-    private int shapeSize = 70;
-    private int shapeX = 100;
-    private int shapeY = 120;
+    private Point shapeSize;
+    private Point shape;
     private double scale = 1.0;
 
     private Button scaleUpButton;
@@ -15,6 +16,24 @@ public class Scalling extends Frame implements ActionListener {
         setTitle("Affine Transformation - Scaling");
         setLayout(new FlowLayout());
         setVisible(true);
+
+        addKeyListener(new KeyAdapter() {
+            public void keyPressed(KeyEvent e) {
+                if (e.getKeyCode() == KeyEvent.VK_ENTER) {
+                    String input = JOptionPane
+                            .showInputDialog("Masukkan koordinat X1,Y1,lebar,tinggi (pisahkan dengan koma):");
+                    String[] coordinates = input.split(",");
+                    if (coordinates.length == 4) {
+                        shape = new Point(Integer.parseInt(coordinates[0]), Integer.parseInt(coordinates[1]));
+                        shapeSize = new Point(Integer.parseInt(coordinates[2]), Integer.parseInt(coordinates[3]));
+                        repaint();
+                    } else {
+                        JOptionPane.showMessageDialog(null, "Input tidak valid!");
+                    }
+                }
+            }
+
+        });
 
         scaleUpButton = new Button("Scale Up");
         scaleUpButton.addActionListener(this);
@@ -30,27 +49,28 @@ public class Scalling extends Frame implements ActionListener {
         Graphics2D g2d = (Graphics2D) g;
 
         // Calculate the scaled size of the shape
-        int scaledSize = (int) (shapeSize * scale);
+        int scaledSizex = (int) (shapeSize.x * scale);
+        int scaledSizey = (int) (shapeSize.x * scale);
 
         // Calculate the position of the scaled shape
-        int scaledX = shapeX - (scaledSize - shapeSize) / 2;
-        int scaledY = shapeY - (scaledSize - shapeSize) / 2;
+        int scaledX = shape.x - (scaledSizex - shapeSize.x) / 2;
+        int scaledY = shape.y - (scaledSizey - shapeSize.y) / 2;
 
         // Draw the shape
         g2d.setColor(Color.BLUE);
-        g2d.fillRect(scaledX, scaledY, scaledSize, scaledSize);
+        g2d.fillRect(scaledX, scaledY, scaledSizex, scaledSizey);
 
         // Output the coordinate details
         g2d.setColor(Color.BLACK);
         g2d.setFont(new Font("Arial", Font.PLAIN, (int) (12 * scale)));
         int textOffset = (int) (15 * scale);
         g2d.drawString(": (" + scaledX + ", " + scaledY + ")", scaledX, scaledY - textOffset);
-        g2d.drawString(": (" + (scaledX + scaledSize) + ", " + scaledY + ")", scaledX + scaledSize,
+        g2d.drawString(": (" + (scaledX + scaledSizex) + ", " + scaledY + ")", scaledX + scaledSizex,
                 scaledY - textOffset);
-        g2d.drawString(": (" + scaledX + ", " + (scaledY + scaledSize) + ")", scaledX,
-                scaledY + scaledSize + textOffset);
-        g2d.drawString(": (" + (scaledX + scaledSize) + ", " + (scaledY + scaledSize) + ")", scaledX + scaledSize,
-                scaledY + scaledSize + textOffset);
+        g2d.drawString(": (" + scaledX + ", " + (scaledY + scaledSizey) + ")", scaledX,
+                scaledY + scaledSizey + textOffset);
+        g2d.drawString(": (" + (scaledX + scaledSizex) + ", " + (scaledY + scaledSizey) + ")", scaledX + scaledSizex,
+                scaledY + scaledSizey + textOffset);
     }
 
     public void actionPerformed(ActionEvent e) {
