@@ -3,14 +3,13 @@ import java.awt.event.WindowAdapter;
 import java.awt.event.WindowEvent;
 import java.util.List;
 
-
 public class ClippingResultFrame extends Frame {
-
-    private List<Point> vertices;
+    private Point start, end;
     private Point clickedPoint;
 
-    public ClippingResultFrame(List<Point> vertices, Point clickedPoint) {
-        this.vertices = vertices;
+    public ClippingResultFrame(Point start, Point end, Point clickedPoint) {
+        this.start = start;
+        this.end = end;
         this.clickedPoint = clickedPoint;
 
         setTitle("Clipping Result");
@@ -31,11 +30,7 @@ public class ClippingResultFrame extends Frame {
 
         // Draw the line
         g.setColor(Color.BLACK);
-        for (int i = 0; i < vertices.size() - 1; i++) {
-            Point p1 = vertices.get(i);
-            Point p2 = vertices.get(i + 1);
-            g.drawLine(p1.x, p1.y, p2.x, p2.y);
-        }
+        g.drawLine(start.x, start.y, end.x, end.y);
 
         // Draw the clipping rectangle if a point is clicked
         if (clickedPoint != null) {
@@ -48,11 +43,7 @@ public class ClippingResultFrame extends Frame {
 
             // Draw the clipped line
             g.setColor(Color.BLUE);
-            for (int i = 0; i < vertices.size() - 1; i++) {
-                Point p1 = vertices.get(i);
-                Point p2 = vertices.get(i + 1);
-                g.drawLine(p1.x, p1.y, p2.x, p2.y);
-            }
+            g.drawLine(start.x, start.y, end.x, end.y);
         }
     }
 }
