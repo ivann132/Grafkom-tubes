@@ -1,87 +1,124 @@
 import java.awt.*;
 import java.awt.event.*;
+import java.awt.geom.AffineTransform;
 
-public class Scaling2 extends Frame implements ActionListener {
-    private int shapeSize = 100;
-    private int shapeX = 150;
-    private int shapeY = 150;
-    private double scaleX = 1.0;
-    private double scaleY = 1.0;
-
-    private Button upButton;
-    private Button downButton;
-    private Button rightButton;
-    private Button leftButton;
+public class Scaling2 extends Frame implements ActionListener, MouseListener, MouseMotionListener {
+    private int shapeSize = 70;
+    private int shapeX;
+    private int shapeY;
+    private int initialShapeX;
+    private int initialShapeY;
+    private double shearX = 0.0;
+    private double shearY = 0.0;
+    private boolean isDrawing = false;
+    // ButtonShear
+    private Button shearRightButton;
+    private Button shearLeftButton;
 
     public Scaling2() {
         setSize(400, 400);
-        setTitle("Affine Transformation - Scaling");
+        setTitle("Manual Shearing");
         setLayout(new FlowLayout());
         setVisible(true);
+        addMouseListener(this);
+        addMouseMotionListener(this);
 
-        upButton = new Button("Up");
-        upButton.addActionListener(this);
-        add(upButton);
+        shearRightButton = new Button("Shear Right");
+        shearRightButton.addActionListener(this);
+        add(shearRightButton);
 
-        downButton = new Button("Down");
-        downButton.addActionListener(this);
-        add(downButton);
-
-        rightButton = new Button("Right");
-        rightButton.addActionListener(this);
-        add(rightButton);
-
-        leftButton = new Button("Left");
-        leftButton.addActionListener(this);
-        add(leftButton);
+        shearLeftButton = new Button("Shear Left");
+        shearLeftButton.addActionListener(this);
+        add(shearLeftButton);
     }
 
     public void paint(Graphics g) {
         super.paint(g);
         Graphics2D g2d = (Graphics2D) g;
 
-        // Calculate the scaled size of the shape
-        int scaledWidth = (int) (shapeSize * scaleX);
-        int scaledHeight = (int) (shapeSize * scaleY);
+        // Membersihkan hasil transformasi sebelumnya
+        g2d.setTransform(new AffineTransform());
 
-        // Calculate the position of the scaled shape
-        int scaledX = shapeX - scaledWidth / 2;
-        int scaledY = shapeY - scaledHeight / 2;
+        // Manual Shearing
+        g2d.shear(shearX, shearY);
 
-        // Draw the shape
-        g2d.setColor(Color.RED);
-        g2d.fillRect(scaledX, scaledY, scaledWidth, scaledHeight);
+        // Melakukan draw bangun dalam suatu posisi
+        g2d.setColor(Color.BLUE);
+        g2d.fillRect(shapeX, shapeY, shapeSize, shapeSize);
 
-        // Output the coordinate details on the edges of the shape
+        // Penulisan text koordinat
         g2d.setColor(Color.BLACK);
-        g2d.drawString("(" + scaledX + ", " + scaledY + ")", scaledX, scaledY);
-        g2d.drawString("(" + (scaledX + scaledWidth) + ", " + scaledY + ")", scaledX + scaledWidth, scaledY);
-        g2d.drawString("(" + scaledX + ", " + (scaledY + scaledHeight) + ")", scaledX, scaledY + scaledHeight);
-        g2d.drawString("(" + (scaledX + scaledWidth) + ", " + (scaledY + scaledHeight) + ")", scaledX + scaledWidth,
-                scaledY + scaledHeight);
+        g2d.setFont(new Font("Arial", Font.PLAIN, 12));
+        int textOffset = 15;
+        g2d.drawString(": (" + shapeX + ", " + shapeY + ")", shapeX, shapeY - textOffset);
+        g2d.drawString(": (" + (shapeX + shapeSize) + ", " + shapeY + ")", shapeX + shapeSize, shapeY - textOffset);
+        g2d.drawString(": (" + shapeX + ", " + (shapeY + shapeSize) + ")", shapeX, shapeY + shapeSize + textOffset);
+        g2d.drawString(": (" + (shapeX + shapeSize) + ", " + (shapeY + shapeSize) + ")", shapeX + shapeSize,
+                shapeY + shapeSize + textOffset);
     }
 
     public void actionPerformed(ActionEvent e) {
-        double scaleChange = 0.1;
-
-        if (e.getSource() == upButton) {
-            scaleY += scaleChange; // Increase vertical scale (scale up)
-        } else if (e.getSource() == downButton) {
-            scaleY -= scaleChange; // Decrease vertical scale (scale down)
-            if (scaleY < scaleChange) {
-                scaleY = scaleChange; // Minimum vertical scale
-            }
-        } else if (e.getSource() == rightButton) {
-            scaleX += scaleChange; // Increase horizontal scale (scale up)
-        } else if (e.getSource() == leftButton) {
-            scaleX -= scaleChange; // Decrease horizontal scale (scale down)
-            if (scaleX < scaleChange) {
-                scaleX = scaleChange; // Minimum horizontal scale
-            }
+        if (e.getSource() == shearRightButton) {
+            shearX += 0.1; // Increase shear factor berdasarkan sumbu x
+        } else if (e.getSource() == shearLeftButton) {
+            shearX -= 0.1; // Decrease shear factor berdasarkan sumbu X
         }
-
-        // Trigger a repaint to update the scaling
+        // Melakukan repaint apabila ada update skala
         repaint();
+    }
+
+    public void mouseClicked(MouseEvent e) {
+    }
+
+    public void mousePressed(MouseEvent e) {
+        if (!isDrawing) {
+            // isDrawing start
+            initialShapeX = e.getX();
+            initialShapeY = e.getY();
+            shapeX = initialShapeX;
+            shapeY = initialShapeY;
+            isDrawing = true;
+        }
+    }
+
+    public void mouseReleased(MouseEvent e) {
+        if (isDrawing) {
+            // Melakukan hasil akhir dari bangun
+            int finalShapeX = e.getX();
+            int finalShapeY = e.getY();
+            shapeX = Math.min(initialShapeX, finalShapeX);
+            shapeY = Math.min(initialShapeY, finalShapeY);
+            int shapeWidth = Math.abs(finalShapeX - initialShapeX);
+            int shapeHeight = Math.abs(finalShapeY - initialShapeY);
+            shapeSize = Math.min(shapeWidth, shapeHeight);
+            shearX = 0.0;
+            shearY = 0.0;
+            isDrawing = false;
+            repaint();
+        }
+    }
+
+    public void mouseEntered(MouseEvent e) {
+    }
+
+    public void mouseExited(MouseEvent e) {
+    }
+
+    public void mouseDragged(MouseEvent e) {
+        if (isDrawing) {
+            // Update ukuran berdasarkan mouse
+            int currentShapeX = e.getX();
+            int currentShapeY = e.getY();
+            int shapeWidth = Math.abs(currentShapeX - initialShapeX);
+            int shapeHeight = Math.abs(currentShapeY - initialShapeY);
+            shapeSize = Math.min(shapeWidth, shapeHeight);
+            shapeX = Math.min(currentShapeX, initialShapeX);
+            shapeY = Math.min(currentShapeY, initialShapeY);
+            repaint();
+        }
+    }
+
+    public void mouseMoved(MouseEvent e) {
     }
 
     public static void main(String[] args) {
